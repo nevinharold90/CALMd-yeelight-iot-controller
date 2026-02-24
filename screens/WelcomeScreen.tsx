@@ -1,20 +1,28 @@
 import { Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
 
-export default function HomeScreen() {
+// Type for this screen's navigation prop
+type WelcomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Welcome"
+>;
+
+export default function WelcomeScreen() {
+  const navigation = useNavigation<WelcomeScreenNavigationProp>();
+
   return (
     <SafeAreaView className="flex-1 bg-[#F0F4F8]">
-      {/* ScrollView ensures it works on small screens and allows vertical centering */}
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          paddingHorizontal: 30,
+          marginTop: 260, 
+          paddingHorizontal: 40,
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* App Name */}
         <Text
           className="text-center"
           style={{
@@ -29,18 +37,17 @@ export default function HomeScreen() {
           CALM
         </Text>
 
-        {/* Accent Bar */}
         <View
           style={{
+            alignItems: 'center',
             height: 6,
-            width: 80,
+            width: 108,
             backgroundColor: "#60A5FA",
             borderRadius: 12,
             marginVertical: 10,
           }}
         />
 
-        {/* Tagline */}
         <Text
           className="text-center"
           style={{
@@ -54,23 +61,22 @@ export default function HomeScreen() {
           Illuminate Your Emotions
         </Text>
 
-        {/* Description */}
         <Text
-            style={{
-                color: "#64748B",
-                fontSize: 16,
-                fontWeight: "400",
-                lineHeight: 26,
-                marginBottom: 36,
-                textAlign: "justify", // ← This makes it justified
-            }}
-            >
-            Select how you feel — receive gentle guidance, evidence-based insights, 
-            and personalized steps toward balance. Your connected lights respond 
-            instantly with soothing, mood-aligned colors to support your journey.
+          style={{
+            color: "#64748B",
+            fontSize: 16,
+            fontWeight: "400",
+            lineHeight: 26,
+            marginBottom: 36,
+            textAlign: "justify",
+          }}
+        >
+          Select how you feel — receive gentle guidance, evidence-based insights, 
+          and personalized steps toward balance. Your connected lights respond 
+          instantly with soothing, mood-aligned colors to support your journey.
         </Text>
 
-        {/* Start Button */}
+        {/* Continue Button */}
         <TouchableOpacity
           style={{
             backgroundColor: "#3B82F6",
@@ -83,17 +89,18 @@ export default function HomeScreen() {
             shadowRadius: 12,
             elevation: 6,
           }}
-          onPress={() => console.log("Start your calm journey")}
+          onPress={() => navigation.navigate("Dashboard")} // ✅ Navigate to Dashboard
         >
           <Text
             style={{
               color: "#FFFFFF",
+              textAlign: 'center',
               fontSize: 18,
               fontWeight: "600",
               letterSpacing: 0.5,
             }}
           >
-            Begin Your Journey
+            Continue
           </Text>
         </TouchableOpacity>
       </ScrollView>
