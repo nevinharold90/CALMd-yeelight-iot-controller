@@ -3,3 +3,10 @@ This project is dedicated to our friend's daughter for their final project to pa
 
 # Resources for now
 https://www.yeelight.com/en_US/developer
+
+
+# Dependencies 
+
+1. Instruction in #1, do this only in the root folder: 
+- ```npx create-expo-app@latest . --template blank-typescript```
+
