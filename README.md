@@ -3,12 +3,10 @@ This project is dedicated to our friend's daughter for their final project to pa
 
 # Resources for now
 - https://www.yeelight.com/en_US/developer
-- https://www.nativewind.dev/
-- https://reactnative.dev/ : https://reactnative.dev/docs/typescript
+- https://www.nativewind.dev/ 
+- https://reactnative.dev/ and https://reactnative.dev/docs/typescript
 
 # Dependencies 
 
-1. Run this after repo
+1. Run this after cloning
 - ```npm install```
-
-
