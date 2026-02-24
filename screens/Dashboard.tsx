@@ -106,7 +106,7 @@ export default function Dashboard() {
       borderRadius: 999,
       paddingVertical: 14,
       marginHorizontal: 6,
-      alignItems: "center",
+      alignItems: "center" as const,
       borderWidth: 1,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },

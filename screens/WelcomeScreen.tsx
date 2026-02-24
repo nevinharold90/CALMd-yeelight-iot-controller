@@ -18,7 +18,9 @@ export default function WelcomeScreen() {
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          marginTop: 260, 
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: 250, 
           paddingHorizontal: 40,
         }}
         showsVerticalScrollIndicator={false}
@@ -41,10 +43,11 @@ export default function WelcomeScreen() {
           style={{
             alignItems: 'center',
             height: 6,
-            width: 108,
+            width: "60%",
             backgroundColor: "#60A5FA",
             borderRadius: 12,
             marginVertical: 10,
+             marginBottom: 30,
           }}
         />
 
@@ -79,6 +82,7 @@ export default function WelcomeScreen() {
         {/* Continue Button */}
         <TouchableOpacity
           style={{
+            width: "100%",
             backgroundColor: "#3B82F6",
             paddingVertical: 14,
             paddingHorizontal: 44,
