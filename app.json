@@ -25,7 +25,13 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.CALMdyeelightiotcontroller"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fe0a5b31-5a85-4a0b-acbd-245242342535"
+      }
     }
   }
 }

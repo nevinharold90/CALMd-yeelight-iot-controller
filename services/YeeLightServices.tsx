@@ -4,12 +4,15 @@ import { Buffer } from 'buffer';
 const DISCOVERY_IP = '239.255.255.250';
 const DISCOVERY_PORT = 1982;
 
-// 🎯 TARGET LOCK: Replace this with the ID you see in your console logs 
-// It usually looks like "0x0000000005243f"
-const MY_TARGET_ID = "0x0000000004d6654"; 
+// 🎯 TARGET LOCK: The last 6 characters of your MAC address
+const TARGET_ID_SUFFIX = "1b193e40";
 
-export const discoverAndFilterBulb = (onTargetFound: (ip: string) => void) => {
+export const discoverAndFilterBulb = (
+    onSuccess: (ip: string) => void,
+    onError: (errorMsg: string) => void // 🚨 Added error handling for the UI
+) => {
     const socket = UdpSocket.createSocket({ type: 'udp4' });
+    let isFound = false; // Flag to prevent multiple triggers
 
     const message = Buffer.from(
         'M-SEARCH * HTTP/1.1\r\n' +
@@ -18,36 +21,62 @@ export const discoverAndFilterBulb = (onTargetFound: (ip: string) => void) => {
         'ST: wifi_bulb\r\n'
     );
 
-    socket.on('message', (msg, rinfo) => {
+    socket.on('message', (msg) => {
+        if (isFound) return; // Ignore if we already locked onto the target
+
         const response = msg.toString();
         
         // Regex to extract the ID and the IP from the 'Location' header
-        const idMatch = response.match(/id: (0x[0-9a-fA-F]+)/);
-        const locationMatch = response.match(/Location: yeelight:\/\/([\d\.]+):/);
+        const idMatch = response.match(/id: (0x[0-9a-fA-F]+)/i);
+        const locationMatch = response.match(/Location: yeelight:\/\/([\d\.]+):/i);
 
         if (idMatch && locationMatch) {
-            const bulbId = idMatch[1];
+            const bulbId = idMatch[1].toLowerCase();
             const bulbIp = locationMatch[1];
 
             console.log(`--- Device Spotted ---`);
             console.log(`ID: ${bulbId} | IP: ${bulbIp}`);
 
-            // 🛡️ THE FILTER: Only trigger the callback if it's YOUR bulb
-            if (bulbId.toLowerCase().includes("4d6654")) { // Using end of your MAC
-                console.log("✅ Target Verified. Connecting...");
-                onTargetFound(bulbIp);
-                socket.close(); // Stop searching once found
+            // 🛡️ THE FILTER: Use the constant instead of a hardcoded string
+            if (bulbId.includes(TARGET_ID_SUFFIX)) {
+                console.log(`✅ Target Verified! MAC matched. IP locked to: ${bulbIp}`);
+                isFound = true;
+                onSuccess(bulbIp);
+                
+                try {
+                    socket.close(); // Clean up the network port
+                } catch (e) {
+                    console.log("Socket close cleanup:", e);
+                }
             }
         }
     });
 
-    socket.bind(0);
-
-    socket.send(message, 0, message.length, DISCOVERY_PORT, DISCOVERY_IP, (err) => {
-        if (err) console.error('UDP Shout failed', err);
+    // Handle unexpected network errors
+    socket.on('error', (err) => {
+        console.error('UDP Socket Error:', err);
+        onError(err.message);
+        socket.close();
     });
 
+    socket.bind(0, () => {
+        // Send the "Shout" only after the socket is successfully bound
+        socket.send(message, 0, message.length, DISCOVERY_PORT, DISCOVERY_IP, (err) => {
+            if (err) {
+                console.error('UDP Shout failed', err);
+                onError("Failed to broadcast on network.");
+            } else {
+                console.log('🗣️ Broadcasting search for MAC ending in:', TARGET_ID_SUFFIX);
+            }
+        });
+    });
+
+    // ⏱️ THE FAILSAFE: If 5 seconds pass and no bulb answered, tell the UI to show an error
     setTimeout(() => {
-        try { socket.close(); } catch (e) {}
-    }, 10000);
+        if (!isFound) {
+            console.log("❌ Search timeout: Target bulb not found.");
+            onError("Bulb not found. Ensure it is powered on and connected to the same network.");
+            try { socket.close(); } catch (e) {}
+        }
+    }, 5000); // 5 seconds is plenty of time for a local UDP response
 };

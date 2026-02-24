@@ -94,7 +94,7 @@ export default function Dashboard() {
 
   const getEmotionIcon = (emotion: "Happy" | "Sad" | "Angry" | null) => {
     if (!emotion) return "😐";
-    if (emotion === "Happy") return "😄";
+    if (emotion === "Happy") return "😂🤣";
     if (emotion === "Sad") return "😢";
     if (emotion === "Angry") return "😠";
   };

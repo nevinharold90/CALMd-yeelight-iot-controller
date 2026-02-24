@@ -38,7 +38,6 @@ export default function WelcomeScreen() {
         >
           CALM
         </Text>
-
         <View
           style={{
             alignItems: 'center',
