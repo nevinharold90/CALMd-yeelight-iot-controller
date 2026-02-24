@@ -12,5 +12,8 @@ This project is dedicated to our friend's daughter for their final project to pa
 - https://reactnative.dev/ and https://reactnative.dev/docs/typescript
 
 # Dependencies 
-- Run this after cloning
+Run this after cloning
 - ```npm install```
+
+# Error faced
+- Inside the App.tsx, "<SafeAreaProvider>" should be use, not "safe-area-view". 
