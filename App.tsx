@@ -1,18 +1,30 @@
 import "./global.css";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import HomeScreen from "./screens/HomeScreen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+import WelcomeScreen from "./screens/WelcomeScreen";
+import Dashboard from "./screens/Dashboard";
+
+// 1️⃣ Declare the navigation param list
+export type RootStackParamList = {
+  Welcome: undefined;    // No params expected
+  Dashboard: undefined;  // No params expected
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      {/* We put the background color here so it covers the whole screen, 
-        including the status bar and navigation bar areas.
-      */}
-      <SafeAreaProvider className="flex-1 bg-slate-950">
+      <NavigationContainer>
         <StatusBar style="light" />
-        <HomeScreen />
-      </SafeAreaProvider>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Dashboard" component={Dashboard} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
