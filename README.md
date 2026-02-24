@@ -1,3 +1,4 @@
+# About the Project
 This project is dedicated to our friend's daughter for their final project to pass grade 12; proceeding to college. The project uses "Yeelight" lighting technologies where it emphasizes what kind of light to use to a certain mood that is triggered in the app. 
 
 # Folder Structure
