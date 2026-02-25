@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CALMd",
-    "slug": "CALMd-yeelight-iot-controller",
+    "slug": "calmd",
     "version": "1.2b",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
