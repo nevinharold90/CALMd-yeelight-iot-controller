@@ -1,21 +1,19 @@
 {
   "expo": {
-    "name": "CALMd-yeelight-iot-controller",
+    "name": "CALMd",
     "slug": "CALMd-yeelight-iot-controller",
-    "version": "1.0.0",
+    "version": "1.2b",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "web": {
-      "bundler": "metro",
-      "favicon": "./assets/favicon.png"
-    },
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -24,14 +22,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.CALMdyeelightiotcontroller"
+      "package": "com.nevin.calmd"
     },
     "extra": {
       "eas": {
         "projectId": "fe0a5b31-5a85-4a0b-acbd-245242342535"
       }
-    }
+    },
+    "owner": "harold90"
   }
 }
