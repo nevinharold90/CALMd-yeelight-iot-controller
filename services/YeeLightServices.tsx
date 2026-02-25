@@ -1,5 +1,7 @@
 import UdpSocket from 'react-native-udp';
 import { Buffer } from 'buffer';
+import TcpSocket from 'react-native-tcp-socket';
+
 
 const DISCOVERY_IP = '239.255.255.250';
 const DISCOVERY_PORT = 1982;
@@ -79,4 +81,25 @@ export const discoverAndFilterBulb = (
             try { socket.close(); } catch (e) {}
         }
     }, 5000); // 5 seconds is plenty of time for a local UDP response
+
 };
+
+
+export const sendColorCommand = (ip: string, payload: string) => {
+    console.log(`Attempting to send command to bulb at IP: ${ip}`);
+
+    const client = TcpSocket.createConnection({ port: 55443, host: ip }, () => {
+            console.log(`🔌 Connected to ${ip}! Sending payload...`);
+            client.write(payload); 
+        });
+
+    client.on('data', (data) => {
+            console.log('💡 Bulb Replied:', data.toString());
+            client.destroy(); 
+        });
+
+    client.on('error', (error) => {
+            console.error('❌ TCP Socket Error:', error);
+            client.destroy();
+        });
+}

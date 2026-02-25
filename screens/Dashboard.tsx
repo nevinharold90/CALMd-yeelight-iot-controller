@@ -2,9 +2,19 @@ import { useState } from "react";
 import { Text, View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useRoute, RouteProp } from "@react-navigation/native";
+import { sendColorCommand } from "../services/YeeLightServices";
+import { RootStackParamList } from "../App";
+
 export default function Dashboard() {
+  const route = useRoute<RouteProp<RootStackParamList, "Dashboard">>();
+
   const [selectedEmotion, setSelectedEmotion] = useState<"Happy" | "Sad" | "Angry" | null>(null);
   const [calmQuote, setCalmQuote] = useState<string>("");
+
+
+  const { bulbIp } = route.params; // 👈 Is this line here?
+
 
   const emotions: Array<"Happy" | "Sad" | "Angry"> = ["Happy", "Sad", "Angry"];
 
@@ -37,14 +47,64 @@ export default function Dashboard() {
     `"The best way to capture moments is to pay attention. This is how we cultivate mindfulness." — Jon Kabat-Zinn`,
   ];
 
-  // Toggle selection (unclick if same emotion)
-  const toggleEmotion = (emotion: "Happy" | "Sad" | "Angry") => {
+  // Toggle selection (unclick if same emotion) 
+  // This is also the triggering point of interacting with the Bulb; sending payloads 
+const toggleEmotion = (emotion: "Happy" | "Sad" | "Angry") => {
+    console.log("DEBUG: toggleEmotion called with ->", emotion);
+    
+    // --- 1. UI & RESET LOGIC ---
     if (selectedEmotion === emotion) {
       setSelectedEmotion(null);
       const randomIndex = Math.floor(Math.random() * calmQuotes.length);
       setCalmQuote(calmQuotes[randomIndex]);
-    } else {
+
+      // 🌈 THE RAINBOW RESET (Triggered when you unselect a mood)
+      console.log("🌈 Initializing Rainbow Reset to Warm White...");
+      
+      const resetPayload = JSON.stringify({
+        id: 99,
+        method: "start_cf",
+        params: [
+          1, // Run sequence once
+          0, // Stay at the last state (White)
+          "1500,1,16711680,100, 1500,1,65280,100, 1500,1,255,100, 500,2,3500,100" 
+          // (Red -> Green -> Blue -> Warm White)
+        ]
+      }) + "\r\n";
+
+      sendColorCommand(bulbIp, resetPayload);
+      return; // 🛑 Stop here so we don't trigger the "Mood" code below
+    } 
+    
+    else {
       setSelectedEmotion(emotion);
+    }
+    
+    // --- 2. MOOD HARDWARE TRIGGERS ---
+    if (emotion === "Sad") {
+      const decimalColor = 16756768;
+      const payload = JSON.stringify({
+        id: 1,
+        method: "set_rgb",
+        params: [decimalColor, "smooth", 500]
+      }) + "\r\n";
+      sendColorCommand(bulbIp, payload);
+    }
+    else if (emotion === "Angry") {
+      const payload = JSON.stringify({
+        id: 2, 
+        method: "set_rgb",
+        params: [16711680, "smooth", 500]
+      }) + "\r\n";
+      sendColorCommand(bulbIp, payload);
+    }
+    else if (emotion === "Happy") {
+      const payload = JSON.stringify({
+        id: 3, 
+        method: "set_rgb",
+        params: [65280, "smooth", 500] // Green
+      }) + "\r\n";
+      sendColorCommand(bulbIp, payload);
     }
   };
 
@@ -94,7 +154,7 @@ export default function Dashboard() {
 
   const getEmotionIcon = (emotion: "Happy" | "Sad" | "Angry" | null) => {
     if (!emotion) return "😐";
-    if (emotion === "Happy") return "😂🤣";
+    if (emotion === "Happy") return "😂";
     if (emotion === "Sad") return "😢";
     if (emotion === "Angry") return "😠";
   };
@@ -139,6 +199,8 @@ export default function Dashboard() {
     };
     return isSelected ? colors[emotion].selectedText : colors[emotion].text;
   };
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
