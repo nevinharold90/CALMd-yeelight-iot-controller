@@ -60,6 +60,7 @@ export default function LoadingScreen() {
             style={{ backgroundColor: "#3B82F6", paddingVertical: 12, paddingHorizontal: 30, borderRadius: 25 }}
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>Retry Connection</Text>
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>Make sure you have the same network connection</Text>
           </TouchableOpacity>
         </View>
       )}
