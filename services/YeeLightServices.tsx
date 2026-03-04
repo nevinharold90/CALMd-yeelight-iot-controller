@@ -84,22 +84,47 @@ export const discoverAndFilterBulb = (
 
 };
 
+let persistentClient: any = null; 
+let currentConnectedIp: string | null = null; // Track WHICH bulb we are talking to
 
 export const sendColorCommand = (ip: string, payload: string) => {
-    console.log(`Attempting to send command to bulb at IP: ${ip}`);
+    // 1. If the IP changed OR the socket died, we MUST reset
+    if (persistentClient && (currentConnectedIp !== ip || persistentClient.destroyed)) {
+        console.log("🔄 IP changed or socket died. Resetting connection...");
+        persistentClient.destroy();
+        persistentClient = null;
+    }
 
-    const client = TcpSocket.createConnection({ port: 55443, host: ip }, () => {
-            console.log(`🔌 Connected to ${ip}! Sending payload...`);
-            client.write(payload); 
-        });
+    // 2. If healthy and same IP, send instantly
+    if (persistentClient && !persistentClient.destroyed) {
+        console.log("⚡ Instant Send (Hotline Active)");
+        persistentClient.write(payload);
+        return;
+    }
 
-    client.on('data', (data) => {
-            console.log('💡 Bulb Replied:', data.toString());
-            client.destroy(); 
-        });
+    // 3. First time connection logic
+    currentConnectedIp = ip;
+    console.log(`🔌 Establishing Hotline to: ${ip}`);
+    
+    persistentClient = TcpSocket.createConnection({ port: 55443, host: ip }, () => {
+        // This makes the data send the millisecond you call .write()
+        persistentClient.setNoDelay(true); 
+        persistentClient.write(payload); 
+    });
 
-    client.on('error', (error) => {
-            console.error('❌ TCP Socket Error:', error);
-            client.destroy();
-        });
-}
+    persistentClient.on('data', (data: any) => {
+        console.log('💡 Bulb Replied:', data.toString());
+    });
+
+    persistentClient.on('error', (error: any) => {
+        console.error('❌ Hotline Error:', error);
+        persistentClient.destroy();
+        persistentClient = null;
+    });
+
+    // Handle sudden disconnects (like if someone flips the light switch)
+    persistentClient.on('close', () => {
+        console.log('🔌 Hotline Closed');
+        persistentClient = null;
+    });
+};

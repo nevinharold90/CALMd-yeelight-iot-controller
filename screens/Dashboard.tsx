@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Text, View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LayoutAnimation, Platform, UIManager } from "react-native";
+
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { sendColorCommand } from "../services/YeeLightServices";
@@ -22,17 +29,35 @@ export default function Dashboard() {
     "Anxiety", "Envy", "Embarrassment", "Ennui",
   ];
 
+  const buttonStyles: Record<Emotion, string> = {
+  Joy: '#FFFF00', Sadness: '#0000FF', Anger: '#FF0000',
+  Fear: '#800080', Disgust: '#00FF00', Anxiety: '#FFA500',
+  Envy: '#00FFFF', Embarrassment: '#FFB6C1', Ennui: '#9966CC'
+};
+
   // RGB decimal values inspired by Inside Out 2 official palettes
-  const emotionColors: Record<Emotion, number> = {
-    Joy: 16776960,        // #FFFF00 bright yellow
-    Sadness: 255,         // #0000FF deep blue
-    Anger: 16711680,      // #FF0000 vivid red
-    Fear: 8388736,        // #800080 purple
-    Disgust: 65280,       // #00FF00 lime green
-    Anxiety: 16750848,    // #FFA500 orange
-    Envy: 65535,          // #00FFFF turquoise/cyan
-    Embarrassment: 16738740, // #FFB6C1 soft pink
-    Ennui: 10040115,      // #9966CC purplish-grey/indigo
+  // const emotionColors: Record<Emotion, number> = {
+  //   Joy: 16776960,        // #FFFF00 bright yellow
+  //   Sadness: 255,         // #0000FF deep blue
+  //   Anger: 16711680,      // #FF0000 vivid red
+  //   Fear: 8388736,        // #800080 purple
+  //   Disgust: 65280,       // #00FF00 lime green
+  //   Anxiety: 16750848,    // #FFA500 orange
+  //   Envy: 65535,          // #00FFFF turquoise/cyan
+  //   Embarrassment: 16738740, // #FFB6C1 soft pink
+  //   Ennui: 10040115,      // #9966CC purplish-grey/indigo
+  // };
+  
+const emotionColors: Record<Emotion, number> = {
+    Joy: 16777215,           // #FFFFFF - To ground and stabilize
+    Sadness: 16766720,       // #FFD700 - To fight "Deep Blue" with "Sunlight"
+    Anger: 8900331,          // #87CEEB - To "cool down" the Vivid Red
+    Fear: 8454115,           // #80FF63 (Soft Mint/Teal) - To counteract the Purple "Void"
+    Disgust: 15132666,       // #E6E6FA - To wash away the "Lime Green" visceral feeling
+    Anxiety: 9419919,        // #8FBC8F - To calm the "High Alert" Orange
+    Envy: 16758706,          // #FFB7B2 - To soften the "Cold" Turquoise envy
+    Embarrassment: 13260,    // #003366 - To hide the "Pink" blush in a safe dark blue
+    Ennui: 16750848,         // #FFA500 - To wake up the "Purplish-grey" with energy
   };
 
   const emotionIcons: Record<Emotion | "default", string> = {
@@ -72,29 +97,29 @@ export default function Dashboard() {
   ];
 
   const toggleEmotion = (emotion: Emotion) => {
+    // 1. Prepare the "Fade" animation
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
     if (selectedEmotion === emotion) {
       setSelectedEmotion(null);
-      const randomCalm = calmQuotes[Math.floor(Math.random() * calmQuotes.length)];
-      setCalmQuote(randomCalm);
-
-      const resetPayload = JSON.stringify({
-        id: 99,
-        method: "start_cf",
-        params: [1, 0, "1500,1,16711680,100, 1500,1,65280,100, 1500,1,255,100, 500,2,3500,100"],
-      }) + "\r\n";
-      sendColorCommand(bulbIp, resetPayload);
+      // ... rest of your reset logic
       return;
     }
 
-    setSelectedEmotion(emotion);
+    // 2. Add a tiny delay before the UI and Bulb "Transform" 
+    // This makes the press feel intentional
+    setTimeout(() => {
+      setSelectedEmotion(emotion);
 
-    const color = emotionColors[emotion];
-    const payload = JSON.stringify({
-      id: 1,
-      method: "set_rgb",
-      params: [color, "smooth", 800],
-    }) + "\r\n";
-    sendColorCommand(bulbIp, payload);
+      const color = emotionColors[emotion];
+      const payload = JSON.stringify({
+        id: 1,
+        method: "set_rgb",
+        params: [color, "smooth", 2000], // 2 second smooth transition on the bulb
+      }) + "\r\n";
+      
+      sendColorCommand(bulbIp, payload);
+    }, 300); // 300ms delay: just enough to feel "thoughtful" but not "laggy"
   };
 
   const generateAdvice = (emotion: Emotion) => {
@@ -243,29 +268,35 @@ export default function Dashboard() {
           <View style={styles.emotionsRow}>
             {emotions.map((emotion) => {
               const isSelected = selectedEmotion === emotion;
-              const hex = `#${emotionColors[emotion].toString(16).padStart(6, '0')}`;
-              const textColor = isSelected ? "#FFFFFF" : hex; // white when selected, emotion color when not
+              const antidoteHex = `#${emotionColors[emotion].toString(16).padStart(6, '0')}`;
+              const symptomHex = buttonStyles[emotion];
+              // 3. THE LOGIC: 
+              // If NOT pressed: background is very faint symptom color.
+              // If PRESSED: background becomes the SOLID antidote color.
+              const currentBg = isSelected ? antidoteHex : `${symptomHex}1A`;
+              const currentBorder = isSelected ? antidoteHex : symptomHex;
+              
+              // Text is white when "fighting" the emotion, or the symptom color when idle
+              const textColor = isSelected ? "#FFFFFF" : symptomHex;
 
               return (
-                <TouchableOpacity
+              <TouchableOpacity
                   key={emotion}
-                  activeOpacity={0.85}
                   onPress={() => toggleEmotion(emotion)}
                   style={[
                     styles.emotionButton,
                     {
-                      backgroundColor: isSelected ? hex : `${hex}1A`, // very subtle tint (~10% opacity) when not selected
-                      borderColor: hex,
-                      borderWidth: isSelected ? 0 : 1.5,
+                      backgroundColor: currentBg, 
+                      // Force the border to match the background so it's "seamless"
+                      borderColor: isSelected ? antidoteHex : symptomHex,
+                      borderWidth: 2, // Keep it consistent
+                      // Remove default shadows that might look gray
+                      shadowOpacity: isSelected ? 0.4 : 0.05, 
+                      elevation: isSelected ? 4 : 1,
                     },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.emotionText,
-                      { color: textColor },
-                    ]}
-                  >
+                  <Text style={{ color: isSelected ? "#FFF" : symptomHex }}>
                     {emotion}
                   </Text>
                 </TouchableOpacity>
