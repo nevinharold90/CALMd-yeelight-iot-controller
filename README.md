@@ -18,3 +18,5 @@ Run this after cloning
 
 # Error faced ☠️
 - Inside the App.tsx, "<SafeAreaProvider>" should be use, not "safe-area-view". 
+
+# Psychology of Colors
